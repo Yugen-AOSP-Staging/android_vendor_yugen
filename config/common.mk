@@ -18,6 +18,19 @@ YUGEN_PATH := vendor/yugen
 include $(YUGEN_PATH)/config/version.mk
 include $(YUGEN_PATH)/config/theme.mk
 
+# --- Blueprint scanning ---------------------------------------------------
+# Both of these checkouts ship an Android.bp that defines
+# prebuilt_libprotobuf-*-vendorcompat, which duplicates the AOSP module of
+# the same name. kernel/platform is a downstream kernel checkout that happens
+# to carry Blueprint files, and prebuilts/misc/protobuf_vendorcompat exists
+# only for LineageOS's protobuf Soong plugin. Exclude them from scanning.
+PRODUCT_SOURCE_ROOT_DIRS += -kernel/platform
+PRODUCT_SOURCE_ROOT_DIRS += -prebuilts/misc/protobuf_vendorcompat
+
+# Prebuilt vendors (vendor/<oem>/<thing>) can opt out of scanning from their
+# own tree. Same hook LineageOS provides.
+-include $(sort $(wildcard vendor/*/*/exclude-bp.mk))
+
 # --- Identity ------------------------------------------------------------
 # Brand only. PRODUCT_MODEL and PRODUCT_MANUFACTURER stay owned by the device
 # tree: Play certification and hardware attestation key off them.
